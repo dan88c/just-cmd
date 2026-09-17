@@ -1,0 +1,5 @@
+{
+  "action": "extract_summary",
+  "target_url": "https://news.ycombinator.com",
+  "task": "Summarize top 3 headlines"
+}
