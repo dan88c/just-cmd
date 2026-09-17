@@ -1,32 +1,31 @@
 set windows-shell := ["powershell.exe", "-NoProfile", "-Command"]
 
-python_bin   := "python"
-bridge_root  := "C:/work/just-bridge"
-wallop_root  := "C:/work/wallop-bare"
+python_bin := "python"
+root_dir   := justfile_directory()
 
-# 印出當前 justfile 所在的絕對目錄路徑
+# Print absolute directory path of the active justfile
 path:
-    @Write-Host "{{justfile_directory()}}"
+    @Write-Host "{{root_dir}}"
 
-# 列出可用任務
+# List all available recipes
 check:
     just-cmd --list
 
 # -----------------------------------------------------------------------------
-# Demo Tasks
+# Demo Tasks (Subdirectory Path Variations)
 # -----------------------------------------------------------------------------
 
-# 1. 執行於 C:\work\just-bridge
+# Pattern 1: Execute from repository root with relative script path
 demo-sentinel payload="demo/system-sentinel/sample_payload.json":
-    Set-Location "{{bridge_root}}"; & {{python_bin}} demo/system-sentinel/sentinel.py {{payload}}
+    Set-Location "{{root_dir}}"; & {{python_bin}} demo/system-sentinel/sentinel.py {{payload}}
 
-# 2. 執行於 C:\work\wallop-bare
-demo-calendar payload="demo/calendar-gateway/sample_payload.json":
-    Set-Location "{{wallop_root}}"; & {{python_bin}} demo/calendar-gateway/calendar.py {{payload}}
+# Pattern 2: Switch execution context into the specific gateway subdirectory
+demo-calendar payload="sample_payload.json":
+    Set-Location "{{root_dir}}/demo/calendar-gateway"; & {{python_bin}} calendar.py {{payload}}
 
-# 3. 執行於 C:\work\wallop-bare
+# Pattern 3: Execute from gateway folder while resolving payload path from root
 demo-openclaw payload="demo/openclaw-gateway/sample_payload.json":
-    Set-Location "{{wallop_root}}"; & {{python_bin}} demo/openclaw-gateway/openclaw_runner.py {{payload}}
+    Set-Location "{{root_dir}}/demo/openclaw-gateway"; & {{python_bin}} openclaw_runner.py (Join-Path "{{root_dir}}" "{{payload}}")
 
-# 一鍵依序執行
+# Run all demo pipelines sequentially
 demo-all: demo-sentinel demo-calendar demo-openclaw
